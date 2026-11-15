@@ -29,6 +29,14 @@ pnpm-debug.log*
 .env
 .env*.local
 
+# Dynoo local-only product studio
+/app/admin/
+/app/api/local-admin/
+/.dynoo-local/
+/public/local-products/
+/.taste-skill/
+/dynoo-dev*.log
+
 # vercel
 .vercel
 

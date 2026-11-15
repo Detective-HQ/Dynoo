@@ -52,7 +52,37 @@ button {
 }
 
 .image-zoom:hover img {
-  transform: scale(1.04);
+  transform: scale(1.08);
+}
+
+.product-card-media .product-card-image {
+  transition: opacity .4s ease, transform .75s cubic-bezier(.2, .8, .2, 1);
+}
+
+.product-card-media .product-card-image-alt {
+  opacity: 0;
+  transform: scale(1.02);
+}
+
+.product-card-media:hover .product-card-image-primary,
+.product-card-media:focus-visible .product-card-image-primary {
+  opacity: 0;
+  transform: scale(1.1);
+}
+
+.product-card-media:hover .product-card-image-alt,
+.product-card-media:focus-visible .product-card-image-alt {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.product-detail-image {
+  transition: transform .75s cubic-bezier(.2, .8, .2, 1);
+}
+
+.product-detail-photo:hover .product-detail-image,
+.product-detail-photo:focus-visible .product-detail-image {
+  transform: scale(1.14);
 }
 
 .fade-up {
