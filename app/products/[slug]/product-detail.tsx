@@ -114,6 +114,7 @@ export default function ProductDetail({ product }: { product: Product }) {
                 <Image
                   priority
                   fill
+                  quality={95}
                   sizes="(max-width: 768px) 100vw, 60vw"
                   src={activeView.src}
                   alt={activeView.alt}
@@ -320,8 +321,8 @@ export default function ProductDetail({ product }: { product: Product }) {
               </button>
             </>
           )}
-          <div className="relative h-[82vh] w-full max-w-6xl">
-            <Image src={activeView.src} alt={activeView.alt} fill sizes="95vw" className="object-contain" />
+          <div className="relative h-[85vh] w-full max-w-6xl">
+            <Image src={activeView.src} alt={activeView.alt} fill sizes="95vw" quality={98} className="object-contain" priority />
           </div>
           <p className="absolute bottom-4 left-1/2 -translate-x-1/2 text-sm text-paper">{activeView.label}</p>
         </div>

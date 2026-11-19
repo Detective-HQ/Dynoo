@@ -289,8 +289,8 @@ function ProductCard({ product, onView }: { product: Product; onView: () => void
     <article className="motion-item group">
       <div className="product-card-media image-zoom relative aspect-[.79] w-full overflow-hidden bg-stone">
         <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`} className="absolute inset-0">
-          <Image fill sizes="(max-width: 768px) 50vw, 25vw" className="product-card-image product-card-image-primary object-cover" src={product.image} alt={product.name} />
-          <Image fill sizes="(max-width: 768px) 50vw, 25vw" className="product-card-image product-card-image-alt object-cover" src={product.altImage} alt="" aria-hidden="true" />
+          <Image fill sizes="(max-width: 768px) 50vw, 25vw" quality={92} className="product-card-image product-card-image-primary object-cover" src={product.image} alt={product.name} />
+          <Image fill sizes="(max-width: 768px) 50vw, 25vw" quality={92} className="product-card-image product-card-image-alt object-cover" src={product.altImage} alt="" aria-hidden="true" />
         </Link>
         {product.badge && (
           <span className={`pointer-events-none absolute left-3 top-3 z-10 px-2 py-1 text-[9px] font-black tracking-wider ${product.originalPrice ? "bg-red-600 text-white shadow-sm" : "bg-paper text-ink"}`}>
@@ -348,7 +348,7 @@ function QuickView({ product, onClose, onAdd }: { product: Product; onClose: () 
         <button onClick={onClose} className="absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center bg-paper shadow-sm" aria-label="Close product details"><X size={19} /></button>
         <div className="flex flex-col">
           <div className="relative min-h-[380px] flex-1 bg-stone">
-            <Image fill sizes="(max-width:768px) 100vw, 50vw" className="object-cover" src={currentImage} alt={product.name} />
+            <Image fill sizes="(max-width:768px) 100vw, 50vw" quality={95} className="object-cover" src={currentImage} alt={product.name} />
           </div>
           {product.gallery && product.gallery.length > 1 && (
             <div className="flex gap-2 overflow-x-auto bg-stone/50 p-3">
