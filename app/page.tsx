@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import { ArrowRight, Check, ChevronRight, Menu, Minus, Plus, Search, ShoppingBag, UserRound, X } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, Menu, Minus, Plus, Search, ShoppingBag, UserRound, X, Eye } from "lucide-react";
 import { categories, products, Product } from "@/data/products";
 
 type CartItem = { product: Product; color: string; size: string; quantity: number };
@@ -142,8 +142,8 @@ export default function Home() {
       </div>
     </div>
 
-    {/* ═══════ FEATURED DROPS — Real Product Drops (Drop 01 - 05) ═══════ */}
-    <FeaturedDrops drops={products.filter(p => Boolean(p.dropNumber))} onAdd={addToCart} />
+    {/* ═══════ FEATURED DROPS — Premium Showcase ═══════ */}
+    <FeaturedDrops drops={products.filter(p => Boolean(p.dropNumber))} onAdd={addToCart} onQuickView={setActiveProduct} />
 
     <section id="bulk-orders" className="observe bg-[#f7941d] px-5 py-20 text-[#0a0a0a] md:px-9 md:py-28">
       <div className="mx-auto max-w-[1500px]">
@@ -254,14 +254,40 @@ export default function Home() {
 
     <section id="categories" className="observe mx-auto max-w-[1600px] px-5 py-24 md:px-9 md:py-36">
       <div className="motion-item mb-12 flex items-end justify-between"><div><p className="eyebrow text-teal">Curated for repeat wear</p><h2 className="display mt-3 text-5xl font-bold md:text-8xl">FIND YOUR<br />EVERYDAY.</h2></div><button onClick={() => scrollTo("shop")} className="hidden items-center gap-2 text-xs font-bold tracking-[.1em] md:flex">SHOP ALL <ArrowRight size={15} /></button></div>
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-5">{categories.map((category, i) => <button key={category.name} onClick={() => { setQuery(category.name); scrollTo("shop"); }} className={`reveal-image image-zoom motion-item group relative h-[255px] overflow-hidden text-left md:h-[420px] ${i === 1 ? "md:mt-14" : ""}`}><Image fill sizes="(max-width: 768px) 50vw, 25vw" src={category.image} alt={category.name} className="object-cover" /><span className="absolute inset-0 bg-teal/10 transition group-hover:bg-teal/25" /><span className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-4 text-sm font-bold text-paper md:p-5 md:text-base">{category.name}<ArrowRight size={18} /></span></button>)}</div>
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
+        {categories.map((category, i) => (
+          <button
+            key={category.name}
+            onClick={() => { setQuery(category.name); scrollTo("shop"); }}
+            className={`category-card motion-item group relative h-[280px] text-left md:h-[440px] ${i === 1 ? "md:mt-14" : ""}`}
+          >
+            <Image fill sizes="(max-width: 768px) 50vw, 25vw" src={category.image} alt={category.name} className="object-cover" />
+            <span className="category-card-overlay absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+            <span className="absolute bottom-0 left-0 right-0 flex items-center justify-between p-5 text-sm font-bold text-paper md:p-6 md:text-base">
+              {category.name}
+              <span className="flex h-8 w-8 items-center justify-center rounded-full border border-paper/40 transition group-hover:bg-paper group-hover:text-teal">
+                <ArrowRight size={14} />
+              </span>
+            </span>
+          </button>
+        ))}
+      </div>
     </section>
 
     <section id="shop" className="observe bg-paper py-24 md:py-32">
       <div className="mx-auto max-w-[1600px] px-5 md:px-9">
-        <div className="motion-item mb-12 flex flex-col justify-between gap-5 md:flex-row md:items-end"><div><p className="eyebrow text-teal">The first collection</p><h2 className="display mt-3 text-5xl font-bold md:text-8xl">THE FIRST DROP.</h2><p className="mt-4 text-sm text-ink/70">Everyday staples. Distinctive identity.</p></div><button onClick={() => setQuery("")} className="self-start border-b border-ink pb-1 text-xs font-bold tracking-[.1em]">VIEW ALL PRODUCTS</button></div>
+        <div className="motion-item mb-14 flex flex-col justify-between gap-5 md:flex-row md:items-end">
+          <div>
+            <p className="eyebrow text-teal">The first collection</p>
+            <h2 className="display mt-3 text-5xl font-bold md:text-8xl">THE FIRST DROP.</h2>
+            <p className="mt-4 text-sm text-ink/70">Everyday staples. Distinctive identity.</p>
+          </div>
+          <button onClick={() => setQuery("")} className="self-start border-b border-ink pb-1 text-xs font-bold tracking-[.1em]">VIEW ALL PRODUCTS</button>
+        </div>
         {query && <div className="mb-6 flex items-center gap-3 text-xs font-bold uppercase tracking-wider">Showing: {query}<button onClick={() => setQuery("")} className="text-teal underline">Clear</button></div>}
-        <div className="grid grid-cols-2 gap-x-3 gap-y-10 md:grid-cols-4 md:gap-x-5">{(query ? results : storefrontProducts).map(product => <ProductCard product={product} key={product.id} onView={() => setActiveProduct(product)} />)}</div>
+        <div className="grid grid-cols-2 gap-x-4 gap-y-12 md:grid-cols-4 md:gap-x-6">
+          {(query ? results : storefrontProducts).map(product => <ProductCard product={product} key={product.id} onView={() => setActiveProduct(product)} />)}
+        </div>
       </div>
     </section>
 
@@ -284,79 +310,107 @@ export default function Home() {
   </main>;
 }
 
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  PRODUCT CARD — Premium, clean, with hover effects                */
+/* ═══════════════════════════════════════════════════════════════════ */
+
 function ProductCard({ product, onView }: { product: Product; onView: () => void }) {
+  const isDropProduct = Boolean(product.originalPrice);
+
   return (
     <article className="motion-item group">
-      <div className="product-card-media image-zoom relative aspect-[.79] w-full overflow-hidden bg-stone">
+      <div className="product-card-media relative aspect-[3/4] w-full overflow-hidden rounded-xl bg-stone">
         <Link href={`/products/${product.slug}`} aria-label={`View ${product.name}`} className="absolute inset-0">
           <Image fill sizes="(max-width: 768px) 50vw, 25vw" quality={92} className="product-card-image product-card-image-primary object-cover" src={product.image} alt={product.name} />
           <Image fill sizes="(max-width: 768px) 50vw, 25vw" quality={92} className="product-card-image product-card-image-alt object-cover" src={product.altImage} alt="" aria-hidden="true" />
         </Link>
+
+        {/* Top-left badge: simple drop number or category badge */}
         {product.badge && (
-          <span className={`pointer-events-none absolute left-3 top-3 z-10 px-2 py-1 text-[9px] font-black tracking-wider ${product.originalPrice ? "bg-red-600 text-white shadow-sm" : "bg-paper text-ink"}`}>
-            {product.badge}
+          <span className={`pointer-events-none absolute left-3 top-3 z-10 rounded-lg px-2.5 py-1.5 text-[10px] font-black tracking-wider ${
+            isDropProduct ? "bg-black/80 text-white backdrop-blur-sm" : "bg-paper/90 text-ink backdrop-blur-sm"
+          }`}>
+            {product.dropNumber || product.badge}
           </span>
         )}
-        {product.originalPrice && (
-          <span className="pointer-events-none absolute right-3 top-3 z-10 rounded bg-[#e8fc47] px-1.5 py-0.5 text-[9px] font-black tracking-wider text-black shadow-sm">
-            OVERSIZED ALSO
+
+        {/* Offer flag on top-right for drop products */}
+        {isDropProduct && (
+          <span className="offer-badge-pulse pointer-events-none absolute right-3 top-3 z-10 rounded-lg bg-red-600 px-2.5 py-1.5 text-[10px] font-black tracking-wider text-white shadow-lg shadow-red-600/30">
+            ₹{product.originalPrice! - product.price} OFF
           </span>
         )}
-        <button onClick={onView} className="absolute inset-x-3 bottom-3 z-20 translate-y-0 bg-paper py-3 text-center text-[10px] font-bold tracking-widest text-teal transition md:translate-y-14 md:group-hover:translate-y-0 md:focus-visible:translate-y-0">
-          QUICK VIEW
-        </button>
-      </div>
-      <div className="pt-4">
-        <div className="flex items-baseline justify-between gap-2 text-sm font-bold">
-          <Link href={`/products/${product.slug}`} className="text-left hover:text-teal">{product.name}</Link>
-          <div className="flex items-baseline gap-1.5 shrink-0">
-            {product.originalPrice && (
-              <span className="text-xs text-ink/40 line-through font-normal">{money(product.originalPrice)}</span>
-            )}
-            <span className={product.originalPrice ? "text-red-600 font-black" : ""}>{money(product.price)}</span>
-          </div>
+
+        {/* Quick View + Add to Bag overlay on hover */}
+        <div className="absolute inset-x-0 bottom-0 z-20 flex gap-2 p-3 translate-y-0 md:translate-y-20 md:group-hover:translate-y-0 transition-transform duration-300">
+          <button
+            onClick={(e) => { e.preventDefault(); onView(); }}
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-lg bg-paper/95 py-3 text-[10px] font-bold tracking-widest text-ink backdrop-blur-sm transition hover:bg-paper"
+          >
+            <Eye size={13} /> QUICK VIEW
+          </button>
         </div>
-        {product.originalPrice && (
-          <div className="mt-1.5 flex items-center justify-between text-[11px]">
-            <span className="font-bold text-red-600">
-              Offer Price · Save {money(product.originalPrice - product.price)}
-            </span>
-            {product.quote && (
-              <span className="italic text-ink/40 truncate max-w-[130px]">&ldquo;{product.quote}&rdquo;</span>
-            )}
-          </div>
+      </div>
+
+      <div className="pt-4">
+        <Link href={`/products/${product.slug}`} className="block text-sm font-bold text-ink hover:text-teal transition-colors leading-snug">
+          {product.name}
+        </Link>
+        <div className="mt-2 flex items-baseline gap-2">
+          {isDropProduct ? (
+            <>
+              <span className="text-base font-black text-red-600">{money(product.price)}</span>
+              <span className="text-xs text-ink/40 line-through">{money(product.originalPrice!)}</span>
+            </>
+          ) : (
+            <span className="text-base font-bold text-ink">{money(product.price)}</span>
+          )}
+        </div>
+        {isDropProduct && (
+          <p className="mt-1.5 text-[11px] font-semibold text-teal">
+            Oversized Available · Front + Back Print
+          </p>
         )}
-        <div className="mt-2.5 flex gap-1.5">
-          {product.colors.map(color => <span title={color.name} key={color.name} className="h-3.5 w-3.5 rounded-full border border-ink/20" style={{ backgroundColor: color.hex }} />)}
+        <div className="mt-3 flex gap-1.5">
+          {product.colors.map(color => <span title={color.name} key={color.name} className="h-3 w-3 rounded-full border border-ink/15 shadow-sm" style={{ backgroundColor: color.hex }} />)}
         </div>
       </div>
     </article>
   );
 }
-function Look({ image, alt, className }: { image: string; alt: string; className: string }) { return <div className={`image-zoom relative min-h-64 overflow-hidden ${className}`}><Image fill sizes="(max-width:768px) 50vw, 33vw" className="object-cover" src={image} alt={alt} /></div> }
+
+function Look({ image, alt, className }: { image: string; alt: string; className: string }) { return <div className={`image-zoom relative min-h-64 overflow-hidden rounded-xl ${className}`}><Image fill sizes="(max-width:768px) 50vw, 33vw" className="object-cover" src={image} alt={alt} /></div> }
+
+/* ═══════════════════════════════════════════════════════════════════ */
+/*  QUICK VIEW MODAL — Cleaner, more focused                         */
+/* ═══════════════════════════════════════════════════════════════════ */
+
 function QuickView({ product, onClose, onAdd }: { product: Product; onClose: () => void; onAdd: (p: Product, c: string, s: string) => void }) {
   const [color, setColor] = useState("");
   const [size, setSize] = useState("");
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const invalid = !color || !size;
 
-  const currentImage = product.gallery?.[activeImageIndex]?.src || product.image;
+  // Show first 3 images in quick view (front, back, poster)
+  const quickGallery = (product.gallery || []).slice(0, 3);
+  const currentImage = quickGallery[activeImageIndex]?.src || product.image;
 
   return (
-    <div role="dialog" aria-modal className="fixed inset-0 z-50 grid place-items-end bg-ink/50 p-0 backdrop-blur-sm md:place-items-center md:p-6">
-      <div className="modal-in relative grid max-h-[95vh] w-full overflow-auto bg-paper md:max-w-4xl md:grid-cols-2">
-        <button onClick={onClose} className="absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center bg-paper shadow-sm" aria-label="Close product details"><X size={19} /></button>
-        <div className="flex flex-col">
-          <div className="relative min-h-[380px] flex-1 bg-stone">
-            <Image fill sizes="(max-width:768px) 100vw, 50vw" quality={95} className="object-cover" src={currentImage} alt={product.name} />
+    <div role="dialog" aria-modal className="fixed inset-0 z-50 grid place-items-end bg-ink/50 p-0 backdrop-blur-sm md:place-items-center md:p-6" onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="modal-in relative grid max-h-[95vh] w-full overflow-auto bg-paper md:max-w-4xl md:grid-cols-2 md:rounded-2xl md:shadow-2xl">
+        <button onClick={onClose} className="absolute right-4 top-4 z-10 grid h-9 w-9 place-items-center rounded-full bg-paper shadow-md transition hover:bg-stone" aria-label="Close product details"><X size={18} /></button>
+        
+        <div className="flex flex-col bg-stone/50">
+          <div className="relative min-h-[400px] flex-1 overflow-hidden">
+            <Image fill sizes="(max-width:768px) 100vw, 50vw" quality={95} className="object-cover transition-all duration-500" src={currentImage} alt={product.name} />
           </div>
-          {product.gallery && product.gallery.length > 1 && (
-            <div className="flex gap-2 overflow-x-auto bg-stone/50 p-3">
-              {product.gallery.map((view, i) => (
+          {quickGallery.length > 1 && (
+            <div className="flex gap-2 p-3">
+              {quickGallery.map((view, i) => (
                 <button
                   key={view.src}
                   onClick={() => setActiveImageIndex(i)}
-                  className={`relative h-14 w-12 shrink-0 overflow-hidden border-2 transition ${activeImageIndex === i ? "border-teal" : "border-transparent opacity-60 hover:opacity-100"}`}
+                  className={`relative h-16 w-14 shrink-0 overflow-hidden rounded-lg border-2 transition ${activeImageIndex === i ? "border-teal ring-1 ring-teal/30" : "border-transparent opacity-50 hover:opacity-100"}`}
                 >
                   <img src={view.src} alt="" className="h-full w-full object-cover" />
                 </button>
@@ -364,59 +418,50 @@ function QuickView({ product, onClose, onAdd }: { product: Product; onClose: () 
             </div>
           )}
         </div>
-        <div className="p-7 md:p-10">
+
+        <div className="p-7 md:p-9">
           <div className="flex items-center gap-2">
             <p className="eyebrow text-teal">{product.category}</p>
-            {product.dropNumber && <span className="rounded bg-black px-2 py-0.5 text-[9px] font-black text-white">{product.dropNumber}</span>}
+            {product.dropNumber && <span className="rounded-md bg-ink px-2 py-0.5 text-[9px] font-black text-paper">{product.dropNumber}</span>}
           </div>
-          <h2 className="mt-2 text-3xl font-bold tracking-[-.06em]">{product.name}</h2>
+          <h2 className="mt-2 text-2xl font-black tracking-[-.05em] md:text-3xl">{product.name}</h2>
           
           <div className="mt-3 flex items-baseline gap-3">
             <span className={`text-2xl font-black ${product.originalPrice ? "text-red-600" : ""}`}>{money(product.price)}</span>
             {product.originalPrice && (
               <>
-                <span className="text-base text-ink/40 line-through font-normal">{money(product.originalPrice)}</span>
-                <span className="rounded-full bg-red-100 px-2.5 py-0.5 text-xs font-bold text-red-700">
-                  OFFER · SAVE {money(product.originalPrice - product.price)}
+                <span className="text-sm text-ink/35 line-through">{money(product.originalPrice)}</span>
+                <span className="rounded-full bg-red-50 px-2.5 py-1 text-[10px] font-bold text-red-600">
+                  SAVE {money(product.originalPrice - product.price)}
                 </span>
               </>
             )}
           </div>
 
+          <p className="mt-4 text-sm leading-6 text-ink/60">{product.description}</p>
+
           {product.specs && (
-            <div className="mt-4 rounded-lg border border-line bg-stone/60 p-3 text-xs">
-              <div className="grid grid-cols-2 gap-2">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-ink/50">Front Print:</span>
-                  <p className="font-semibold text-ink">{product.specs.front}</p>
-                </div>
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-ink/50">Back Print:</span>
-                  <p className="font-semibold text-ink">{product.specs.back}</p>
-                </div>
-              </div>
-              <div className="mt-2.5 inline-block rounded bg-[#e8fc47] px-2 py-0.5 text-[10px] font-black text-black">
-                ★ AVAILABLE IN OVERSIZED ALSO
-              </div>
+            <div className="mt-4 flex items-center gap-4 text-xs">
+              <span className="rounded-full bg-stone px-3 py-1.5 font-semibold text-ink/70">Front: {product.specs.front}</span>
+              <span className="rounded-full bg-stone px-3 py-1.5 font-semibold text-ink/70">Back: {product.specs.back}</span>
             </div>
           )}
 
-          <p className="mt-5 text-sm leading-6 text-ink/65">{product.description}</p>
           <div className="mt-6">
             <p className="eyebrow">Colour {color && `— ${color}`}</p>
-            <div className="mt-3 flex gap-2">{product.colors.map(c => <button aria-label={c.name} onClick={() => setColor(c.name)} key={c.name} className={`h-8 w-8 rounded-full border-2 ${color === c.name ? "border-teal" : "border-transparent"}`} style={{ backgroundColor: c.hex }} />)}</div>
+            <div className="mt-3 flex gap-2">{product.colors.map(c => <button aria-label={c.name} onClick={() => setColor(c.name)} key={c.name} className={`h-8 w-8 rounded-full border-2 transition ${color === c.name ? "border-teal scale-110" : "border-line hover:border-ink"}`} style={{ backgroundColor: c.hex }} />)}</div>
           </div>
-          <div className="mt-6">
+          <div className="mt-5">
             <p className="eyebrow">Select size</p>
-            <div className="mt-3 grid grid-cols-5 gap-2">{product.sizes.map(s => <button onClick={() => setSize(s)} className={`border py-3 text-xs font-bold transition ${size === s ? "border-teal bg-teal text-paper" : "border-line hover:border-ink"}`} key={s}>{s}</button>)}</div>
+            <div className="mt-3 grid grid-cols-5 gap-2">{product.sizes.map(s => <button onClick={() => setSize(s)} className={`rounded-lg border py-3 text-xs font-bold transition ${size === s ? "border-teal bg-teal text-paper" : "border-line hover:border-ink"}`} key={s}>{s}</button>)}</div>
           </div>
-          {invalid && <p className="mt-4 text-xs text-ink/60">Select a colour and size to add this item.</p>}
-          <button disabled={invalid} onClick={() => onAdd(product, color, size)} className="mt-7 flex w-full items-center justify-center gap-2 bg-teal py-4 text-xs font-bold tracking-[.12em] text-paper transition hover:bg-ink disabled:cursor-not-allowed disabled:opacity-40">
+          {invalid && <p className="mt-3 text-xs text-ink/50">Select a colour and size to add this item.</p>}
+          <button disabled={invalid} onClick={() => onAdd(product, color, size)} className="mt-6 flex w-full items-center justify-center gap-2 rounded-xl bg-teal py-4 text-xs font-bold tracking-[.12em] text-paper transition hover:bg-ink disabled:cursor-not-allowed disabled:opacity-30">
             ADD TO BAG — {money(product.price)} <ShoppingBag size={15} />
           </button>
           <div className="mt-3 text-center">
             <Link href={`/products/${product.slug}`} className="text-xs font-semibold text-teal hover:underline">
-              View complete product page & drop poster →
+              View full product page →
             </Link>
           </div>
         </div>
@@ -424,272 +469,216 @@ function QuickView({ product, onClose, onAdd }: { product: Product; onClose: () 
     </div>
   );
 }
-function CartDrawer({ cart, subtotal, onClose, onUpdate }: { cart: CartItem[]; subtotal: number; onClose: () => void; onUpdate: (i: number, c: number) => void }) { return <div className="fixed inset-0 z-50 bg-ink/40" onMouseDown={onClose}><aside onMouseDown={e => e.stopPropagation()} className="drawer-in ml-auto flex h-full w-full max-w-md flex-col bg-paper p-6 md:p-8"><div className="flex items-center justify-between border-b border-line pb-5"><h2 className="text-xl font-bold tracking-[-.05em]">YOUR BAG ({cart.reduce((n, x) => n + x.quantity, 0)})</h2><button onClick={onClose} aria-label="Close cart"><X /></button></div>{cart.length === 0 ? <div className="grid flex-1 place-items-center text-center"><div><ShoppingBag className="mx-auto text-teal" size={30} /><p className="mt-4 text-sm">Your bag is ready for its first piece.</p><button onClick={onClose} className="mt-5 border-b border-teal pb-1 text-xs font-bold tracking-wider text-teal">SHOP THE DROP</button></div></div> : <><div className="flex-1 overflow-auto py-5">{cart.map((item, i) => <div className="mb-5 flex gap-3" key={`${item.product.id}-${item.color}-${item.size}`}><div className="relative h-24 w-20 shrink-0"><Image fill className="object-cover" src={item.product.image} alt={item.product.name} /></div><div className="flex-1 text-sm"><div className="flex justify-between gap-2 font-bold"><p>{item.product.name}</p><p>{money(item.product.price * item.quantity)}</p></div><p className="mt-1 text-xs text-ink/60">{item.color} / {item.size}</p><div className="mt-4 flex items-center gap-3"><button onClick={() => onUpdate(i, -1)} aria-label="Decrease quantity"><Minus size={14} /></button><span className="text-xs font-bold">{item.quantity}</span><button onClick={() => onUpdate(i, 1)} aria-label="Increase quantity"><Plus size={14} /></button><button onClick={() => onUpdate(i, -item.quantity)} className="ml-auto text-[10px] font-bold tracking-wider text-ink/50">REMOVE</button></div></div></div>)}</div><div className="border-t border-line pt-5"><div className="flex justify-between font-bold"><span>Subtotal</span><span>{money(subtotal)}</span></div><p className="mt-2 text-xs text-ink/55">Shipping and taxes calculated at checkout.</p><button onClick={() => alert("Checkout integration point: connect your commerce provider here.")} className="mt-5 w-full bg-teal py-4 text-xs font-bold tracking-[.12em] text-paper">CHECKOUT</button></div></>}</aside></div> }
-function Newsletter({ onMessage }: { onMessage: (x: string) => void }) { const [email, setEmail] = useState(""); const [sending, setSending] = useState(false); const submit = (e: FormEvent) => { e.preventDefault(); if (!/^\S+@\S+\.\S+$/.test(email)) { onMessage("Please enter a valid email address."); return } setSending(true); setTimeout(() => { setSending(false); setEmail(""); onMessage("You’re on the Dynoo list. This is a frontend demo — connect your email platform here."); }, 700) }; return <form onSubmit={submit} className="self-end"><p className="max-w-sm text-sm leading-6 text-paper/70">Get updates on new drops, fresh designs, and everything happening at Dynoo.</p><div className="mt-8 flex border-b border-paper/45"><input aria-label="Email address" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-transparent py-4 text-sm outline-none placeholder:text-paper/45" placeholder="YOUR EMAIL ADDRESS" /><button className="whitespace-nowrap text-xs font-bold tracking-[.1em] text-mint" disabled={sending}>{sending ? "SIGNING UP..." : "SIGN ME UP"}</button></div></form> }
+function CartDrawer({ cart, subtotal, onClose, onUpdate }: { cart: CartItem[]; subtotal: number; onClose: () => void; onUpdate: (i: number, c: number) => void }) { return <div className="fixed inset-0 z-50 bg-ink/40" onMouseDown={onClose}><aside onMouseDown={e => e.stopPropagation()} className="drawer-in ml-auto flex h-full w-full max-w-md flex-col bg-paper p-6 md:p-8"><div className="flex items-center justify-between border-b border-line pb-5"><h2 className="text-xl font-bold tracking-[-.05em]">YOUR BAG ({cart.reduce((n, x) => n + x.quantity, 0)})</h2><button onClick={onClose} aria-label="Close cart"><X /></button></div>{cart.length === 0 ? <div className="grid flex-1 place-items-center text-center"><div><ShoppingBag className="mx-auto text-teal" size={30} /><p className="mt-4 text-sm">Your bag is ready for its first piece.</p><button onClick={onClose} className="mt-5 border-b border-teal pb-1 text-xs font-bold tracking-wider text-teal">SHOP THE DROP</button></div></div> : <><div className="flex-1 overflow-auto py-5">{cart.map((item, i) => <div className="mb-5 flex gap-3" key={`${item.product.id}-${item.color}-${item.size}`}><div className="relative h-24 w-20 shrink-0 rounded-lg overflow-hidden"><Image fill className="object-cover" src={item.product.image} alt={item.product.name} /></div><div className="flex-1 text-sm"><div className="flex justify-between gap-2 font-bold"><p>{item.product.name}</p><p>{money(item.product.price * item.quantity)}</p></div><p className="mt-1 text-xs text-ink/60">{item.color} / {item.size}</p><div className="mt-4 flex items-center gap-3"><button onClick={() => onUpdate(i, -1)} aria-label="Decrease quantity"><Minus size={14} /></button><span className="text-xs font-bold">{item.quantity}</span><button onClick={() => onUpdate(i, 1)} aria-label="Increase quantity"><Plus size={14} /></button><button onClick={() => onUpdate(i, -item.quantity)} className="ml-auto text-[10px] font-bold tracking-wider text-ink/50">REMOVE</button></div></div></div>)}</div><div className="border-t border-line pt-5"><div className="flex justify-between font-bold"><span>Subtotal</span><span>{money(subtotal)}</span></div><p className="mt-2 text-xs text-ink/55">Shipping and taxes calculated at checkout.</p><button onClick={() => alert("Checkout integration point: connect your commerce provider here.")} className="mt-5 w-full rounded-xl bg-teal py-4 text-xs font-bold tracking-[.12em] text-paper">CHECKOUT</button></div></>}</aside></div> }
+function Newsletter({ onMessage }: { onMessage: (x: string) => void }) { const [email, setEmail] = useState(""); const [sending, setSending] = useState(false); const submit = (e: FormEvent) => { e.preventDefault(); if (!/^\S+@\S+\.\S+$/.test(email)) { onMessage("Please enter a valid email address."); return } setSending(true); setTimeout(() => { setSending(false); setEmail(""); onMessage("You're on the Dynoo list. This is a frontend demo — connect your email platform here."); }, 700) }; return <form onSubmit={submit} className="self-end"><p className="max-w-sm text-sm leading-6 text-paper/70">Get updates on new drops, fresh designs, and everything happening at Dynoo.</p><div className="mt-8 flex border-b border-paper/45"><input aria-label="Email address" value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-transparent py-4 text-sm outline-none placeholder:text-paper/45" placeholder="YOUR EMAIL ADDRESS" /><button className="whitespace-nowrap text-xs font-bold tracking-[.1em] text-mint" disabled={sending}>{sending ? "SIGNING UP..." : "SIGN ME UP"}</button></div></form> }
 function Footer({ onNavigate }: { onNavigate: (x: string) => void }) { return <footer className="bg-stone px-5 py-14 md:px-9"><div className="mx-auto grid max-w-[1600px] gap-12 md:grid-cols-[1.8fr_1fr_1fr_1fr]"><div><Wordmark /><p className="mt-5 max-w-xs text-sm leading-6 text-ink/65">Everyday wear. Distinctive identity. Wear the legacy.</p><button onClick={() => onNavigate("shop")} className="mt-7 flex items-center gap-2 text-xs font-bold tracking-[.1em] text-teal">SHOP THE DROP <ArrowRight size={14} /></button></div><FooterGroup title="SHOP" items={[["All Products", "shop"], ["New Arrivals", "shop"], ["Best Sellers", "shop"]]} /><FooterGroup title="HELP" items={[["Custom & Event Orders", "bulk-orders"], ["Contact", "#"], ["FAQs", "#"], ["Shipping Information", "#"], ["Returns", "#"]]} /><FooterGroup title="ABOUT" items={[["Our Story", "story"], ["Instagram", "#"], ["Newsletter", "newsletter"]]} /></div><div className="mx-auto mt-14 flex max-w-[1600px] justify-between border-t border-line pt-5 text-[10px] font-bold tracking-wider text-ink/50"><span>© 2026 DYNOO</span><span>WEAR THE LEGACY.</span></div></footer> }
 function FooterGroup({ title, items }: { title: string; items: string[][] }) { return <div><p className="eyebrow text-teal">{title}</p><div className="mt-4 space-y-3">{items.map(([x, id]) => <button onClick={() => id !== "#" && scrollTo(id)} className="block text-sm text-ink/70 hover:text-teal" key={x}>{x}</button>)}</div></div> }
 function MobileNav({ close, go }: { close: () => void; go: (x: string) => void }) { return <div className="fixed inset-0 z-50 bg-teal p-6 text-paper"><div className="flex justify-between"><Wordmark light /><button onClick={close}><X /></button></div><nav className="mt-20 grid gap-7 text-4xl font-bold tracking-[-.08em]">{[["Shop All", "shop"], ["New Arrivals", "shop"], ["Custom Orders", "bulk-orders"], ["Our Story", "story"]].map(([x, id]) => <button className="text-left" onClick={() => { go(id); close() }} key={x}>{x}</button>)}</nav><button onClick={() => { go("newsletter"); close() }} className="absolute bottom-8 text-xs font-bold tracking-widest text-mint">STAY IN THE LOOP →</button></div> }
 function SearchPanel({ close, query, setQuery, results, choose }: { close: () => void; query: string; setQuery: (x: string) => void; results: Product[]; choose: (p: Product) => void }) { return <div className="fixed inset-0 z-50 bg-paper p-6 md:p-12"><div className="mx-auto max-w-4xl"><div className="flex items-center border-b border-ink"><Search className="mr-3 text-teal" /><input autoFocus value={query} onChange={e => setQuery(e.target.value)} className="w-full bg-transparent py-5 text-2xl outline-none placeholder:text-ink/35" placeholder="Search the collection" /><button onClick={close}><X /></button></div><div className="mt-8 grid gap-2">{query && results.map(p => <button onClick={() => choose(p)} className="flex items-center justify-between border-b border-line py-4 text-left" key={p.id}><span className="font-bold">{p.name}</span><span className="text-sm">{money(p.price)} <ChevronRight className="ml-3 inline" size={16} /></span></button>)}{query && !results.length && <p className="text-sm text-ink/60">Start typing to search the Dynoo collection.</p>}{query && results.length === 0 && <p className="text-sm text-ink/60">No products found.</p>}</div></div></div> }
 
 /* ═══════════════════════════════════════════════════════════════════ */
-/*  FEATURED DROPS — interactive showcase for Dynoo Drops (01 - 05)     */
+/*  FEATURED DROPS — Premium horizontal card carousel                */
 /* ═══════════════════════════════════════════════════════════════════ */
 
-function FeaturedDrops({ drops, onAdd }: { drops: Product[]; onAdd: (p: Product, c: string, s: string) => void }) {
-  const [activeDropIndex, setActiveDropIndex] = useState(0);
-  const [activeViewIndex, setActiveViewIndex] = useState(0);
+function FeaturedDrops({ drops, onAdd, onQuickView }: { drops: Product[]; onAdd: (p: Product, c: string, s: string) => void; onQuickView: (p: Product) => void }) {
+  const [expandedDrop, setExpandedDrop] = useState<number | null>(null);
   const [selectedSize, setSelectedSize] = useState("");
   const [added, setAdded] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
-  const activeProduct = drops[activeDropIndex] || drops[0];
-  const gallery = activeProduct?.gallery || [
-    { src: activeProduct?.image, label: "Front View", alt: "Front view" },
-    { src: activeProduct?.altImage, label: "Back View", alt: "Back view" }
-  ];
-
-  // Reset active image view index and size when switching drop
-  const switchDrop = (index: number) => {
-    setActiveDropIndex(index);
-    setActiveViewIndex(0);
-    setSelectedSize("");
-  };
-
-  const handleAdd = () => {
-    if (!selectedSize || !activeProduct) return;
-    onAdd(activeProduct, activeProduct.colors[0]?.name || "Black", selectedSize);
+  const handleAdd = (product: Product) => {
+    if (!selectedSize) return;
+    onAdd(product, product.colors[0]?.name || "Black", selectedSize);
     setAdded(true);
-    setTimeout(() => setAdded(false), 2000);
+    setTimeout(() => { setAdded(false); setExpandedDrop(null); setSelectedSize(""); }, 1800);
   };
 
-  if (!activeProduct) return null;
+  const scrollLeft = () => {
+    scrollRef.current?.scrollBy({ left: -380, behavior: "smooth" });
+  };
+  const scrollRight = () => {
+    scrollRef.current?.scrollBy({ left: 380, behavior: "smooth" });
+  };
+
+  if (!drops.length) return null;
 
   return (
-    <section id="featured-drop" className="design-dossier bg-[#0a0a0a] py-16 text-white md:py-24">
+    <section id="featured-drop" className="relative bg-[#0a0a0a] py-20 text-white md:py-28 overflow-hidden">
+      {/* Background texture */}
+      <div className="pointer-events-none absolute inset-0 opacity-[0.03]" style={{ backgroundImage: "url(\"data:image/svg+xml,%3Csvg width='60' height='60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30 30 60 0 30z' fill='none' stroke='%23fff' stroke-width='.5'/%3E%3C/svg%3E\")", backgroundSize: "60px 60px" }} />
+
       <div className="mx-auto max-w-[1600px] px-5 md:px-9">
-        {/* Section Heading & Drop Switcher Tabs */}
-        <div className="mb-10 grid gap-6 md:mb-14 md:grid-cols-[1fr_auto] md:items-end">
+        {/* Section Header */}
+        <div className="mb-14 grid gap-6 md:grid-cols-[1fr_auto] md:items-end">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="rounded bg-red-600 px-2.5 py-1 text-[11px] font-black tracking-widest uppercase text-white">
+            <div className="flex items-center gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-4 py-2 text-[11px] font-bold tracking-widest text-white/90 backdrop-blur">
+                <span className="h-2 w-2 rounded-full bg-red-500 animate-pulse" />
                 OFFICIAL DROPS
               </span>
-              <span className="rounded bg-[#e8fc47] px-2.5 py-1 text-[11px] font-black tracking-widest uppercase text-black">
-                OFFER: ₹699 <span className="line-through font-normal text-black/60">₹799</span>
+              <span className="rounded-full bg-gradient-to-r from-red-600 to-orange-500 px-4 py-2 text-[11px] font-black tracking-wider text-white shadow-lg shadow-red-600/20">
+                LAUNCH PRICE: ₹699
               </span>
             </div>
-            <h2 className="mt-4 text-5xl font-black leading-[.88] tracking-[-.08em] md:text-8xl">
-              WEAR THE<br />LEGACY.
+            <h2 className="mt-6 text-5xl font-black leading-[.88] tracking-[-.07em] md:text-8xl">
+              THE DROPS.
             </h2>
+            <p className="mt-4 max-w-lg text-sm leading-7 text-white/50">
+              5 limited edition designs. Front identity. Back statement. Available in regular & oversized — all at ₹699 launch price.
+            </p>
           </div>
-          <p className="max-w-md text-sm leading-7 text-white/65">
-            5 iconic drops designed for repeat wear. Minimal front identity with explosive back collage prints. All drops available in regular and oversized cuts at the special launch offer of ₹699 (Real price: ₹799).
-          </p>
-        </div>
 
-        {/* Drop Navigation Pill Tabs */}
-        <div className="mb-10 flex gap-2 overflow-x-auto pb-2">
-          {drops.map((drop, idx) => (
-            <button
-              key={drop.id}
-              onClick={() => switchDrop(idx)}
-              className={`flex items-center gap-2.5 whitespace-nowrap rounded-lg px-4 py-3 text-xs font-black tracking-wider transition ${
-                activeDropIndex === idx
-                  ? "bg-[#f7941d] text-black shadow-lg shadow-[#f7941d]/20 scale-105"
-                  : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
-              }`}
-            >
-              <span className="rounded bg-black/30 px-1.5 py-0.5 text-[10px]">{drop.dropNumber || `0${idx + 1}`}</span>
-              <span>{drop.name.split("—")[0].trim()}</span>
+          {/* Desktop scroll controls */}
+          <div className="hidden md:flex items-center gap-3">
+            <button onClick={scrollLeft} className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 text-white/60 transition hover:bg-white/10 hover:text-white" aria-label="Scroll left">
+              <ArrowRight size={18} className="rotate-180" />
             </button>
-          ))}
+            <button onClick={scrollRight} className="flex h-12 w-12 items-center justify-center rounded-full border border-white/20 text-white/60 transition hover:bg-white/10 hover:text-white" aria-label="Scroll right">
+              <ArrowRight size={18} />
+            </button>
+          </div>
         </div>
 
-        {/* Product Interactive Display Grid */}
-        <div className="grid gap-10 md:grid-cols-[1.15fr_.85fr] md:gap-16">
-          {/* Gallery display */}
-          <div>
-            <div className="relative aspect-[4/5] overflow-hidden rounded-xl bg-[#141414] shadow-2xl">
-              {gallery.map((view, index) => (
-                <img
-                  key={view.src}
-                  src={view.src}
-                  alt={`${activeProduct.name}: ${view.label}`}
-                  className={`absolute inset-0 h-full w-full object-cover transition-all duration-700 ${
-                    index === activeViewIndex ? "scale-100 opacity-100" : "scale-105 opacity-0"
-                  }`}
-                />
-              ))}
+        {/* Horizontal scrolling drop cards */}
+        <div ref={scrollRef} className="drops-scroll">
+          {drops.map((drop, idx) => {
+            const isExpanded = expandedDrop === idx;
+            return (
+              <div
+                key={drop.id}
+                className={`drop-card relative bg-[#141414] ${isExpanded ? "w-[85vw] md:w-[700px]" : "w-[75vw] md:w-[360px]"} transition-all duration-500`}
+                style={{ minHeight: isExpanded ? "580px" : "520px" }}
+              >
+                {/* Poster Image */}
+                <div className="absolute inset-0 overflow-hidden rounded-2xl">
+                  <img
+                    src={drop.posterImage || drop.image}
+                    alt={drop.name}
+                    className="drop-card-image h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
+                </div>
 
-              {/* Top Banner inside Image */}
-              <div className="absolute left-4 top-4 flex flex-wrap gap-2">
-                <span className="rounded-full bg-black/80 px-3 py-1 text-[11px] font-black tracking-widest text-white backdrop-blur-md">
-                  {activeProduct.dropNumber}
-                </span>
-                <span className="rounded-full bg-[#e8fc47] px-3 py-1 text-[11px] font-black tracking-wide text-black shadow-md">
-                  ★ AVAILABLE IN OVERSIZED ALSO
-                </span>
-              </div>
+                {/* Top Tags */}
+                <div className="relative z-10 flex items-center justify-between p-5">
+                  <span className="rounded-full bg-black/60 px-3 py-1.5 text-[11px] font-black tracking-wider text-white backdrop-blur-md">
+                    {drop.dropNumber}
+                  </span>
+                  <span className="rounded-full bg-red-600/90 px-3 py-1.5 text-[11px] font-black tracking-wider text-white backdrop-blur-md shadow-lg shadow-red-600/30">
+                    ₹{(drop.originalPrice || 799) - drop.price} OFF
+                  </span>
+                </div>
 
-              {/* Bottom Caption Overlay */}
-              <div className="absolute bottom-0 left-0 right-0 flex items-end justify-between bg-gradient-to-t from-black/90 via-black/50 to-transparent p-5 backdrop-blur-[2px]">
-                <div>
-                  <p className="text-xl font-black tracking-[-.04em] text-white">
-                    {gallery[activeViewIndex]?.label || "Product View"}
-                  </p>
-                  {activeProduct.quote && (
-                    <p className="mt-1 text-sm font-semibold text-[#f7941d]">
-                      &ldquo;{activeProduct.quote}&rdquo;
+                {/* Bottom Content */}
+                <div className="absolute bottom-0 left-0 right-0 z-10 p-6">
+                  <h3 className="text-2xl font-black tracking-[-.04em] text-white md:text-3xl">
+                    {drop.name.split("—")[0].trim()}
+                  </h3>
+                  {drop.quote && (
+                    <p className="mt-1 text-sm font-semibold italic text-white/60">
+                      &ldquo;{drop.quote}&rdquo;
                     </p>
                   )}
-                </div>
-                <span className="text-xs font-bold text-white/50">
-                  {String(activeViewIndex + 1).padStart(2, "0")} / {String(gallery.length).padStart(2, "0")}
-                </span>
-              </div>
-            </div>
 
-            {/* Thumbnail switcher */}
-            <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
-              {gallery.map((view, index) => (
-                <button
-                  key={view.src}
-                  onClick={() => setActiveViewIndex(index)}
-                  aria-pressed={activeViewIndex === index}
-                  className={`relative h-20 w-20 shrink-0 overflow-hidden rounded-lg transition-all md:h-24 md:w-24 ${
-                    activeViewIndex === index
-                      ? "ring-2 ring-[#f7941d] ring-offset-2 ring-offset-[#0a0a0a] opacity-100 scale-105"
-                      : "opacity-50 hover:opacity-100"
-                  }`}
-                >
-                  <img src={view.src} alt="" className="h-full w-full object-cover" />
-                  <span className="absolute bottom-1 left-1 right-1 truncate rounded bg-black/70 px-1 text-[9px] font-bold text-center text-white">
-                    {view.label}
-                  </span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Product information & actions */}
-          <div className="flex flex-col justify-center">
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold tracking-widest uppercase text-[#f7941d]">
-                {activeProduct.dropNumber} SPECIAL RELEASE
-              </span>
-            </div>
-
-            <h3 className="mt-2 text-3xl font-black tracking-[-.06em] md:text-5xl">
-              {activeProduct.name}
-            </h3>
-
-            {/* Pricing Section */}
-            <div className="mt-5 flex flex-wrap items-baseline gap-3">
-              <span className="text-4xl font-black text-red-500">
-                {money(activeProduct.price)}
-              </span>
-              {activeProduct.originalPrice && (
-                <>
-                  <span className="text-2xl text-white/40 line-through font-normal">
-                    {money(activeProduct.originalPrice)}
-                  </span>
-                  <span className="rounded-full bg-red-500/20 px-3 py-1 text-xs font-black text-red-400 border border-red-500/40">
-                    SAVE {money(activeProduct.originalPrice - activeProduct.price)} (OFFER PRICE)
-                  </span>
-                </>
-              )}
-            </div>
-            <p className="mt-1 text-xs text-white/40">Original MRP: ₹799 · Limited Drop Launch Price: ₹699</p>
-
-            {/* Specs card */}
-            {activeProduct.specs && (
-              <div className="mt-6 rounded-xl border border-white/10 bg-white/[0.04] p-4 text-xs">
-                <p className="text-[10px] font-bold tracking-widest text-[#f7941d] uppercase mb-2">
-                  Print Placement Specs
-                </p>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-white/45">FRONT</span>
-                    <p className="mt-1 font-bold text-white">{activeProduct.specs.front}</p>
+                  {/* Pricing */}
+                  <div className="mt-3 flex items-baseline gap-2">
+                    <span className="text-2xl font-black text-white">{money(drop.price)}</span>
+                    {drop.originalPrice && (
+                      <span className="text-sm text-white/35 line-through">{money(drop.originalPrice)}</span>
+                    )}
                   </div>
-                  <div>
-                    <span className="text-white/45">BACK</span>
-                    <p className="mt-1 font-bold text-white">{activeProduct.specs.back}</p>
-                  </div>
+
+                  {/* Expanded state: size selection & add to bag */}
+                  {isExpanded ? (
+                    <div className="mt-4 space-y-4">
+                      <div className="flex items-center gap-3 text-xs text-white/50">
+                        <span className="rounded bg-white/10 px-2 py-1">Front: {drop.specs?.front}</span>
+                        <span className="rounded bg-white/10 px-2 py-1">Back: {drop.specs?.back}</span>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-white/60 mb-2">
+                          SELECT SIZE {selectedSize && <span className="text-orange-400">— {selectedSize}</span>}
+                        </p>
+                        <div className="flex gap-2">
+                          {drop.sizes.map(s => (
+                            <button
+                              key={s}
+                              onClick={() => setSelectedSize(s)}
+                              className={`rounded-lg px-4 py-2.5 text-xs font-bold transition-all ${
+                                selectedSize === s
+                                  ? "bg-white text-black scale-105"
+                                  : "bg-white/10 text-white hover:bg-white/20"
+                              }`}
+                            >
+                              {s}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => handleAdd(drop)}
+                          disabled={!selectedSize}
+                          className={`flex flex-1 items-center justify-center gap-2 rounded-xl py-4 text-sm font-black tracking-wider transition-all ${
+                            added
+                              ? "bg-green-500 text-white"
+                              : selectedSize
+                                ? "bg-white text-black hover:bg-white/90"
+                                : "bg-white/10 text-white/30 cursor-not-allowed"
+                          }`}
+                        >
+                          {added ? <><Check size={16} /> ADDED!</> : <><ShoppingBag size={16} /> ADD TO BAG</>}
+                        </button>
+                        <button
+                          onClick={() => { setExpandedDrop(null); setSelectedSize(""); }}
+                          className="rounded-xl bg-white/10 px-4 py-4 text-xs font-bold text-white/60 transition hover:bg-white/20"
+                        >
+                          <X size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-4 flex gap-2">
+                      <button
+                        onClick={() => { setExpandedDrop(idx); setSelectedSize(""); }}
+                        className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-white py-3.5 text-xs font-black tracking-wider text-black transition hover:bg-white/90"
+                      >
+                        <ShoppingBag size={14} /> BUY NOW — {money(drop.price)}
+                      </button>
+                      <button
+                        onClick={() => onQuickView(drop)}
+                        className="flex items-center justify-center rounded-xl bg-white/10 px-4 py-3.5 text-white/70 backdrop-blur transition hover:bg-white/20"
+                        aria-label="Quick view"
+                      >
+                        <Eye size={16} />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Oversized tag */}
+                  <p className="mt-3 text-center text-[10px] font-bold tracking-widest text-white/30">
+                    REGULAR + OVERSIZED · FRONT & BACK PRINT
+                  </p>
                 </div>
               </div>
-            )}
+            );
+          })}
+        </div>
 
-            <p className="mt-5 max-w-xl text-sm leading-7 text-white/70">
-              {activeProduct.description}
-            </p>
-
-            <dl className="mt-6 grid grid-cols-2 gap-x-8 gap-y-4 text-xs">
-              <div><dt className="text-white/40">Fabric</dt><dd className="mt-1 font-semibold text-white">240 GSM heavy cotton</dd></div>
-              <div><dt className="text-white/40">Fit Type</dt><dd className="mt-1 font-semibold text-[#e8fc47]">Available in Regular & Oversized</dd></div>
-              <div><dt className="text-white/40">Color</dt><dd className="mt-1 font-semibold text-white">{activeProduct.colors[0]?.name || "Black"}</dd></div>
-              <div><dt className="text-white/40">Print</dt><dd className="mt-1 font-semibold text-white">Front + Back Dual Print</dd></div>
-            </dl>
-
-            {/* Size selection */}
-            <div className="mt-8">
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-bold text-white/70">
-                  Select Size {selectedSize && <span className="text-[#f7941d]">— {selectedSize}</span>}
-                </p>
-                <span className="text-[11px] font-bold text-white/40">Standard Indian Sizing</span>
-              </div>
-              <div className="mt-3 grid grid-cols-5 gap-2">
-                {activeProduct.sizes.map(s => (
-                  <button
-                    key={s}
-                    onClick={() => setSelectedSize(s)}
-                    className={`rounded-lg py-3.5 text-xs font-bold transition-all ${
-                      selectedSize === s
-                        ? "bg-[#f7941d] text-black shadow-lg shadow-[#f7941d]/30 scale-105 font-black"
-                        : "bg-white/10 text-white hover:bg-white/20"
-                    }`}
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Add to Bag CTA */}
-            <button
-              onClick={handleAdd}
-              disabled={!selectedSize}
-              className={`mt-7 flex w-full items-center justify-center gap-3 rounded-lg py-5 text-sm font-black tracking-wider transition-all ${
-                added
-                  ? "bg-green-500 text-white"
-                  : selectedSize
-                    ? "bg-gradient-to-r from-red-600 to-[#f7941d] text-white shadow-xl shadow-red-600/30 hover:brightness-110"
-                    : "cursor-not-allowed bg-white/10 text-white/30"
-              }`}
-            >
-              {added ? (
-                <><Check size={18} /> ADDED TO BAG!</>
-              ) : (
-                <><ShoppingBag size={18} /> ADD TO BAG — {money(activeProduct.price)}</>
-              )}
-            </button>
-            {!selectedSize && (
-              <p className="mt-2.5 text-center text-xs text-white/40">
-                Please select a size to order at the ₹699 offer price
-              </p>
-            )}
-
-            {/* Direct Link to full page */}
-            <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4 text-xs">
-              <span className="text-white/40">Free shipping & COD available</span>
-              <Link
-                href={`/products/${activeProduct.slug}`}
-                className="flex items-center gap-1.5 font-bold text-[#f7941d] hover:underline"
-              >
-                View full drop poster & specifications <ArrowRight size={14} />
-              </Link>
-            </div>
+        {/* Bottom info bar */}
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4 border-t border-white/10 pt-6">
+          <div className="flex flex-wrap gap-6 text-xs text-white/40">
+            <span>240 GSM Premium Cotton</span>
+            <span>•</span>
+            <span>Free Shipping</span>
+            <span>•</span>
+            <span>COD Available</span>
+            <span>•</span>
+            <span>5 Drops · Limited Edition</span>
           </div>
+          <button onClick={() => scrollTo("shop")} className="flex items-center gap-2 text-xs font-bold tracking-wider text-white/50 transition hover:text-white">
+            VIEW ALL PRODUCTS <ArrowRight size={14} />
+          </button>
         </div>
       </div>
     </section>
