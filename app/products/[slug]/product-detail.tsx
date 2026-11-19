@@ -149,8 +149,52 @@ export default function ProductDetail({ product }: { product: Product }) {
           </section>
 
           <section className="fade-up md:sticky md:top-8 md:self-start">
+            {product.dropNumber && (
+              <div className="fade-up mb-3 flex items-center gap-2">
+                <span className="rounded bg-black px-2.5 py-1 text-[11px] font-black tracking-wider text-white">
+                  {product.dropNumber}
+                </span>
+                {product.originalPrice && (
+                  <span className="rounded bg-red-600 px-2.5 py-1 text-[11px] font-black tracking-wider text-white">
+                    SPECIAL OFFER
+                  </span>
+                )}
+                {product.quote && (
+                  <span className="text-xs italic text-ink/60">
+                    &ldquo;{product.quote}&rdquo;
+                  </span>
+                )}
+              </div>
+            )}
             <h1 className="fade-up max-w-xl text-4xl font-bold leading-[.98] tracking-[-.07em] md:text-4xl lg:text-6xl">{product.name}</h1>
-            <p className="fade-up mt-5 text-xl font-semibold" style={{ animationDelay: "0.08s" }}>{money(product.price)}</p>
+            <div className="fade-up mt-5 flex items-baseline gap-3" style={{ animationDelay: "0.08s" }}>
+              <span className={`text-3xl font-black ${product.originalPrice ? "text-red-600" : "text-ink"}`}>{money(product.price)}</span>
+              {product.originalPrice && (
+                <>
+                  <span className="text-xl text-ink/40 line-through font-normal">{money(product.originalPrice)}</span>
+                  <span className="rounded-full bg-red-100 px-3 py-1 text-xs font-bold text-red-700">
+                    SAVE {money(product.originalPrice - product.price)}
+                  </span>
+                </>
+              )}
+            </div>
+            {product.specs && (
+              <div className="fade-up mt-5 rounded-lg border border-line bg-stone/50 p-4 text-xs" style={{ animationDelay: "0.12s" }}>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <span className="font-bold text-ink/50 uppercase tracking-wider text-[10px]">Front Print</span>
+                    <p className="mt-0.5 font-bold text-ink">{product.specs.front}</p>
+                  </div>
+                  <div>
+                    <span className="font-bold text-ink/50 uppercase tracking-wider text-[10px]">Back Print</span>
+                    <p className="mt-0.5 font-bold text-ink">{product.specs.back}</p>
+                  </div>
+                </div>
+                <div className="mt-3 inline-block rounded bg-[#e8fc47] px-2.5 py-1 text-[11px] font-black tracking-wide text-black">
+                  ★ AVAILABLE IN OVERSIZED ALSO
+                </div>
+              </div>
+            )}
             <p className="fade-up mt-6 max-w-xl text-base leading-7 text-ink/75" style={{ animationDelay: "0.14s" }}>{product.description}</p>
 
             <div className="fade-up mt-9" style={{ animationDelay: "0.2s" }}>
